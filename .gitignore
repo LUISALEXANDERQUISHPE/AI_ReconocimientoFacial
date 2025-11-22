@@ -1,0 +1,126 @@
+# ====================================
+# Python & Django - Face Recognition System
+# ====================================
+
+# ---- Entorno Virtual ----
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# ---- Python Cache ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# ---- Base de Datos ----
+db.sqlite3
+db.sqlite3-journal
+*.db
+
+# ---- Modelos Entrenados (PESADOS) ----
+# Los archivos .h5 pueden ser de 1-10 MB cada uno
+media/models/*.h5
+media/models/*.npy
+media/models/*.keras
+
+# ---- Muestras Faciales (PRIVACIDAD) ----
+# Imágenes de rostros - datos sensibles
+media/samples/
+media/captures/
+media/faces/
+media/photos/
+
+# ---- Archivos de Configuración Sensibles ----
+# Contienen credenciales y secrets
+.env
+.env.local
+.env.production
+settings_local.py
+secrets.json
+
+# ---- Logs ----
+*.log
+logs/
+*.log.*
+
+# ---- IDE & Editores ----
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ---- Jupyter Notebooks ----
+.ipynb_checkpoints/
+*.ipynb
+
+# ---- Testing ----
+.coverage
+.pytest_cache/
+htmlcov/
+.tox/
+
+# ---- Distribución & Builds ----
+build/
+dist/
+*.egg-info/
+*.egg
+
+# ---- Sistema Operativo ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Otros Archivos Temporales ----
+*.bak
+*.tmp
+*.temp
+*.cache
+
+# ====================================
+# ✅ ARCHIVOS A INCLUIR EN GIT
+# ====================================
+# - Código fuente (.py, .html, .css, .js)
+# - Templates y static files
+# - requirements.txt
+# - README.md
+# - settings.py (sin secrets)
+# - manage.py
+# - Estructura de directorios vacía (media/models/, media/samples/)
+
+# ====================================
+# 📝 NOTAS IMPORTANTES
+# ====================================
+# 1. Los modelos entrenados (.h5, .npy) NO se suben porque:
+#    - Son muy pesados (5-10 MB por modelo)
+#    - Se generan automáticamente al entrenar
+#    - Cada usuario debe entrenar su propio modelo
+#
+# 2. Las muestras faciales NO se suben por:
+#    - Privacidad de datos biométricos
+#    - RGPD/GDPR compliance
+#    - Se generan al registrar usuarios
+#
+# 3. db.sqlite3 NO se sube porque:
+#    - Contiene sesiones locales
+#    - Se crea automáticamente con migrate
+#    - Cada instalación necesita su propia BD
+#
+# 4. .env NO se sube porque:
+#    - Contiene credenciales de MongoDB
+#    - SECRET_KEY de Django
+#    - Configuraciones sensibles
+#
+# ====================================
+# 🔧 MANTENER ESTRUCTURA DE DIRECTORIOS
+# ====================================
+# Para que Git mantenga los directorios vacíos,
+# crea archivos .gitkeep en:
+# - media/models/.gitkeep
+# - media/samples/.gitkeep

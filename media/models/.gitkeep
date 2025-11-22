@@ -1,0 +1,3 @@
+# Este archivo mantiene el directorio en Git
+# Los modelos entrenados (.h5, .npy) se generan automáticamente
+# al entrenar el modelo desde el dashboard.

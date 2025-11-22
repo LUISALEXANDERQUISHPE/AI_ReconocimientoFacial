@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Face Recognition System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        /* Pasos */
+        .steps {
+            display: flex;
+            justify-content: space-between;
+            padding: 30px 40px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: -50%;
+            top: 20px;
+            width: 100%;
+            height: 2px;
+            background: #dee2e6;
+            z-index: 1;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #dee2e6;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin: 0 auto 10px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .step.active .step-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .step.completed .step-number {
+            background: #28a745;
+            color: white;
+        }
+
+        .step-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .step.active .step-label {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        /* Content */
+        .content {
+            padding: 40px;
+        }
+
+        .step-content {
+            display: none;
+        }
+
+        .step-content.active {
+            display: block;
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        /* Camera */
+        .camera-container {
+            position: relative;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        #video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .camera-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+        }
+
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 8px;
+            background: #28a745;
+            transition: width 0.3s;
+        }
+
+        .capture-status {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .capture-counter {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        /* Buttons */
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .success-icon {
+            text-align: center;
+            font-size: 5rem;
+            color: #28a745;
+            margin: 20px 0;
+        }
+
+        .summary {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📝 Registro de Usuario</h1>
+            <p>Sistema de Reconocimiento Facial</p>
+        </div>
+
+        <!-- Pasos -->
+        <div class="steps">
+            <div class="step active" id="step-indicator-1">
+                <div class="step-number">1</div>
+                <div class="step-label">Datos Personales</div>
+            </div>
+            <div class="step" id="step-indicator-2">
+                <div class="step-number">2</div>
+                <div class="step-label">Captura Facial</div>
+            </div>
+            <div class="step" id="step-indicator-3">
+                <div class="step-number">3</div>
+                <div class="step-label">Confirmación</div>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- PASO 1: Datos Personales -->
+            <div class="step-content active" id="step-1">
+                <h2>📋 Datos Personales</h2>
+                <div class="info-box">
+                    Por favor completa tus datos para crear tu cuenta
+                </div>
+
+                <form id="form-datos">
+                    <div class="form-group">
+                        <label>Nombre Completo *</label>
+                        <input type="text" id="nombre" required placeholder="Ej: Juan Pérez">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Correo Electrónico</label>
+                        <input type="email" id="email" placeholder="ejemplo@correo.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Departamento</label>
+                        <select id="department">
+                            <option value="Sistemas">Sistemas</option>
+                            <option value="Recursos Humanos">Recursos Humanos</option>
+                            <option value="Ventas">Ventas</option>
+                            <option value="Administración">Administración</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+
+                    <div class="buttons">
+                        <a href="{% url 'login' %}" class="btn btn-secondary">← Volver</a>
+                        <button type="button" class="btn btn-primary" onclick="goToStep(2)">
+                            Siguiente →
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- PASO 2: Captura Facial -->
+            <div class="step-content" id="step-2">
+                <h2>📸 Captura de Huellas Faciales</h2>
+                <div class="info-box">
+                    Capturaremos múltiples imágenes de tu rostro para entrenar el sistema.
+                    <br><strong>🎯 Objetivo: 300 huellas faciales + 6 muestras visuales</strong>
+                    <br><small>⚡ Captura rápida: ~15-20 segundos total</small>
+                </div>
+
+                <div class="camera-container">
+                    <video id="video" autoplay playsinline></video>
+                    <canvas id="canvas" style="display: none;"></canvas>
+                    <div class="camera-overlay">
+                        <div class="capture-status">
+                            <div id="capture-message">Iniciando cámara...</div>
+                            <div class="capture-counter" id="capture-count">0 / 300</div>
+                        </div>
+                        <div class="progress-bar" id="progress-bar" style="width: 0%;"></div>
+                    </div>
+                </div>
+
+                <div class="buttons">
+                    <button class="btn btn-secondary" onclick="goToStep(1)">← Atrás</button>
+                    <button class="btn btn-primary" id="start-capture-btn" onclick="startCapture()">
+                        ▶️ Iniciar Captura
+                    </button>
+                    <button class="btn btn-primary" id="next-step-btn" onclick="goToStep(3)" disabled>
+                        Siguiente →
+                    </button>
+                </div>
+            </div>
+
+            <!-- PASO 3: Confirmación -->
+            <div class="step-content" id="step-3">
+                <div class="success-icon">✅</div>
+                <h2 style="text-align: center;">¡Registro Completado!</h2>
+                
+                <div class="summary">
+                    <div class="summary-item">
+                        <strong>Nombre:</strong>
+                        <span id="summary-name"></span>
+                    </div>
+                    <div class="summary-item">
+                        <strong>Email:</strong>
+                        <span id="summary-email"></span>
+                    </div>
+                    <div class="summary-item">
+                        <strong>Departamento:</strong>
+                        <span id="summary-department"></span>
+                    </div>
+                    <div class="summary-item">
+                        <strong>🔢 Encodings capturados:</strong>
+                        <span id="summary-encodings">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <strong>🖼️ Muestras visuales:</strong>
+                        <span id="summary-samples">0</span>
+                    </div>
+                </div>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Guardando información...</p>
+                </div>
+
+                <div class="buttons">
+                    <button class="btn btn-secondary" onclick="goToStep(2)">← Volver a capturar</button>
+                    <button class="btn btn-primary" onclick="finishRegistration()">
+                        🎉 Finalizar Registro
+                    </button>
+                </div>
+
+                <div class="info-box" style="margin-top: 20px;">
+                    <strong>Siguiente paso:</strong> Un administrador debe entrenar el modelo para que puedas iniciar sesión.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        let capturedEncodings = [];
+        let sampleImages = []; // 6 muestras visuales para trazabilidad
+        let video, canvas, ctx;
+        let capturing = false;
+        let captureInterval;
+        const TARGET_ENCODINGS = 300;
+        const SAMPLE_INTERVAL = 50; // Guardar muestra cada 50 frames (6 muestras totales)
+
+        const formData = {
+            nombre: '',
+            email: '',
+            department: ''
+        };
+
+        function goToStep(step) {
+            // Validar paso 1
+            if (step === 2 && currentStep === 1) {
+                const nombre = document.getElementById('nombre').value.trim();
+                if (!nombre) {
+                    alert('Por favor ingresa tu nombre');
+                    return;
+                }
+                formData.nombre = nombre;
+                formData.email = document.getElementById('email').value;
+                formData.department = document.getElementById('department').value;
+            }
+
+            // Validar paso 2
+            if (step === 3 && currentStep === 2) {
+                if (capturedEncodings.length < 10) {
+                    alert('Necesitas al menos 10 huellas faciales para continuar');
+                    return;
+                }
+            }
+
+            // Actualizar UI
+            document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(`step-${step}`).classList.add('active');
+
+            document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+            document.getElementById(`step-indicator-${step}`).classList.add('active');
+
+            if (step < currentStep) {
+                for (let i = step + 1; i <= currentStep; i++) {
+                    document.getElementById(`step-indicator-${i}`).classList.remove('completed');
+                }
+            }
+
+            if (step > currentStep) {
+                document.getElementById(`step-indicator-${currentStep}`).classList.add('completed');
+            }
+
+            currentStep = step;
+
+            // Inicializar paso 2
+            if (step === 2 && !video) {
+                initCamera();
+            }
+
+            // Inicializar paso 3
+            if (step === 3) {
+                updateSummary();
+            }
+        }
+
+        async function initCamera() {
+            video = document.getElementById('video');
+            canvas = document.getElementById('canvas');
+            ctx = canvas.getContext('2d');
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: 1280, height: 720, facingMode: 'user' }
+                });
+                video.srcObject = stream;
+                
+                video.onloadedmetadata = () => {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    document.getElementById('capture-message').textContent = '✅ Cámara lista';
+                };
+            } catch (error) {
+                document.getElementById('capture-message').textContent = '❌ Error: ' + error.message;
+            }
+        }
+
+        function startCapture() {
+            if (capturing) {
+                stopCapture();
+                return;
+            }
+
+            capturing = true;
+            capturedEncodings = []; // Reiniciar
+            sampleImages = [];
+            document.getElementById('start-capture-btn').textContent = '⏸️ Pausar Captura';
+            document.getElementById('capture-message').textContent = '⚡ Capturando rápido... Mueve tu rostro lentamente';
+            document.getElementById('next-step-btn').disabled = true;
+
+            // Captura rápida: 60-70ms por frame = ~15 fps
+            captureInterval = setInterval(captureFrame, 65);
+        }
+
+        function stopCapture() {
+            capturing = false;
+            clearInterval(captureInterval);
+            document.getElementById('start-capture-btn').textContent = '▶️ Continuar Captura';
+            document.getElementById('capture-message').textContent = '⏸️ Captura pausada';
+        }
+
+        async function captureFrame() {
+            if (!capturing) return;
+
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = canvas.toDataURL('image/jpeg', 0.8);
+
+            try {
+                // Procesar localmente sin guardar en BD (RÁPIDO)
+                const response = await fetch("{% url 'process_frame' %}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: imageData })
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.faces && data.faces.length > 0) {
+                    const face = data.faces[0];
+                    
+                    // Acumular encoding en memoria
+                    capturedEncodings.push({
+                        encoding: face.encoding,
+                        quality_score: face.quality_score,
+                        confidence: face.confidence
+                    });
+
+                    // Guardar muestra visual cada 50 frames (total: 6 muestras)
+                    if (capturedEncodings.length % SAMPLE_INTERVAL === 0 && sampleImages.length < 6) {
+                        sampleImages.push(imageData);
+                        console.log(`✅ Muestra ${sampleImages.length}/6 guardada`);
+                    }
+
+                    updateCaptureUI();
+
+                    if (capturedEncodings.length >= TARGET_ENCODINGS) {
+                        stopCapture();
+                        document.getElementById('capture-message').textContent = `✅ ¡Captura completa! ${TARGET_ENCODINGS} encodings + ${sampleImages.length} muestras`;
+                        document.getElementById('next-step-btn').disabled = false;
+                        document.getElementById('start-capture-btn').disabled = true;
+                    }
+                }
+            } catch (error) {
+                console.error('Error capturando:', error);
+                document.getElementById('capture-message').textContent = '⚠️ Error: ' + error.message;
+            }
+        }
+
+        function updateCaptureUI() {
+            const count = capturedEncodings.length;
+            document.getElementById('capture-count').textContent = `${count} / ${TARGET_ENCODINGS}`;
+            
+            const progress = (count / TARGET_ENCODINGS) * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+
+            // Habilitar "Siguiente" cuando tenga al menos 200 encodings
+            if (count >= 200) {
+                document.getElementById('next-step-btn').disabled = false;
+            }
+        }
+
+        function updateSummary() {
+            document.getElementById('summary-name').textContent = formData.nombre;
+            document.getElementById('summary-email').textContent = formData.email || 'No proporcionado';
+            document.getElementById('summary-department').textContent = formData.department;
+            document.getElementById('summary-encodings').textContent = capturedEncodings.length;
+            document.getElementById('summary-samples').textContent = sampleImages.length;
+        }
+
+        async function finishRegistration() {
+            document.getElementById('loading').style.display = 'block';
+
+            try {
+                console.log(`🚀 Enviando ${capturedEncodings.length} encodings + ${sampleImages.length} muestras...`);
+                
+                const response = await fetch("{% url 'api_register_complete' %}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: formData.nombre,
+                        email: formData.email,
+                        department: formData.department,
+                        encodings: capturedEncodings,
+                        sample_images: sampleImages // 6 muestras visuales
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(`✅ ¡Registro exitoso!\n\n${data.message}\n\nAhora puedes iniciar sesión después de que un administrador entrene el modelo.`);
+                    window.location.href = "{% url 'login' %}";
+                } else {
+                    alert('❌ Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('❌ Error de conexión: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        // Limpiar recursos al salir
+        window.addEventListener('beforeunload', () => {
+            if (video && video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+            }
+        });
+    </script>
+</body>
+</html>

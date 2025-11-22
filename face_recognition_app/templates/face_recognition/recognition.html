@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reconocimiento en Tiempo Real - Face Recognition System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a2e;
+            color: white;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+        }
+
+        .btn-back {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid white;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-back:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        /* Grid Layout */
+        .grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 968px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Video Section */
+        .video-section {
+            background: #16213e;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .video-container {
+            position: relative;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        #video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+        }
+
+        .face-box {
+            position: absolute;
+            border: 3px solid;
+            transition: all 0.2s;
+            box-shadow: 0 0 15px currentColor;
+        }
+
+        .face-label {
+            position: absolute;
+            padding: 5px 10px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+
+        .status-bar {
+            background: rgba(0,0,0,0.8);
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.active {
+            background: #28a745;
+        }
+
+        .status-dot.inactive {
+            background: #dc3545;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Info Section */
+        .info-section {
+            background: #16213e;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .info-card {
+            background: #0f3460;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .info-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: #00d4ff;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: #aaa;
+        }
+
+        .stat-value {
+            font-weight: bold;
+        }
+
+        /* Recognition Log */
+        .log-entry {
+            background: rgba(255,255,255,0.05);
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 3px solid;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .log-entry.success {
+            border-color: #28a745;
+        }
+
+        .log-entry.warning {
+            border-color: #ffc107;
+        }
+
+        .log-entry.danger {
+            border-color: #dc3545;
+        }
+
+        .log-time {
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .model-info {
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid #667eea;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .model-info h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .model-info ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .model-info li {
+            padding: 5px 0;
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎯 Reconocimiento Facial en Tiempo Real</h1>
+        <a href="{% url 'dashboard' %}" class="btn-back">← Volver al Dashboard</a>
+    </div>
+
+    <div class="container">
+        {% if not model_loaded %}
+        <div class="alert alert-warning">
+            ⚠️ <strong>Modelo no cargado:</strong> Necesitas entrenar el modelo primero.
+            <a href="{% url 'train_model' %}" style="color: #856404; text-decoration: underline;">
+                Ir a entrenar modelo
+            </a>
+        </div>
+        {% endif %}
+
+        <div class="grid">
+            <!-- Video Section -->
+            <div class="video-section">
+                <div class="video-container">
+                    <video id="video" autoplay playsinline></video>
+                    <canvas id="canvas" style="display: none;"></canvas>
+                    <div class="video-overlay" id="overlay"></div>
+                </div>
+
+                <div class="status-bar">
+                    <div class="status-indicator">
+                        <div class="status-dot inactive" id="status-dot"></div>
+                        <span id="status-text">Sistema detenido</span>
+                    </div>
+                    <div>
+                        <span id="fps-counter">0 FPS</span>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-primary" id="start-btn" onclick="startRecognition()" {% if not model_loaded %}disabled{% endif %}>
+                        ▶️ Iniciar Reconocimiento
+                    </button>
+                    <button class="btn btn-danger" id="stop-btn" onclick="stopRecognition()" disabled>
+                        ⏸️ Detener
+                    </button>
+                </div>
+
+                {% if model_loaded and available_classes %}
+                <div class="model-info">
+                    <h4>📊 Modelo Cargado</h4>
+                    <ul>
+                        <li>✅ Modelo activo y listo</li>
+                        <li>👥 Clases disponibles: {{ available_classes|length }}</li>
+                        <li>🎯 Personas: {% for name in available_classes %}{{ name }}{% if not forloop.last %}, {% endif %}{% endfor %}</li>
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Info Section -->
+            <div class="info-section">
+                <div class="info-card">
+                    <h3>📊 Estadísticas en Tiempo Real</h3>
+                    <div class="stat-row">
+                        <span class="stat-label">Rostros detectados:</span>
+                        <span class="stat-value" id="faces-detected">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Reconocimientos:</span>
+                        <span class="stat-value" id="recognitions-count">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Confianza promedio:</span>
+                        <span class="stat-value" id="avg-confidence">0%</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Tiempo activo:</span>
+                        <span class="stat-value" id="active-time">00:00</span>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <h3>📝 Registro de Reconocimientos</h3>
+                    <div id="recognition-log"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let video, canvas, ctx, overlay;
+        let isRunning = false;
+        let recognitionInterval;
+        let startTime;
+        let activeTimeInterval;
+        
+        let stats = {
+            facesDetected: 0,
+            recognitions: 0,
+            confidenceSum: 0,
+            confidenceCount: 0
+        };
+
+        async function initCamera() {
+            video = document.getElementById('video');
+            canvas = document.getElementById('canvas');
+            ctx = canvas.getContext('2d');
+            overlay = document.getElementById('overlay');
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: 1280, height: 720, facingMode: 'user' }
+                });
+                video.srcObject = stream;
+                
+                video.onloadedmetadata = () => {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    console.log('✅ Cámara inicializada');
+                };
+            } catch (error) {
+                alert('❌ Error accediendo a la cámara: ' + error.message);
+            }
+        }
+
+        function startRecognition() {
+            if (isRunning) return;
+            
+            isRunning = true;
+            startTime = Date.now();
+            
+            document.getElementById('start-btn').disabled = true;
+            document.getElementById('stop-btn').disabled = false;
+            document.getElementById('status-dot').classList.remove('inactive');
+            document.getElementById('status-dot').classList.add('active');
+            document.getElementById('status-text').textContent = 'Sistema activo - Reconociendo...';
+
+            recognitionInterval = setInterval(processFrame, 500);
+            activeTimeInterval = setInterval(updateActiveTime, 1000);
+        }
+
+        function stopRecognition() {
+            isRunning = false;
+            clearInterval(recognitionInterval);
+            clearInterval(activeTimeInterval);
+            
+            document.getElementById('start-btn').disabled = false;
+            document.getElementById('stop-btn').disabled = true;
+            document.getElementById('status-dot').classList.remove('active');
+            document.getElementById('status-dot').classList.add('inactive');
+            document.getElementById('status-text').textContent = 'Sistema detenido';
+            
+            overlay.innerHTML = '';
+        }
+
+        async function processFrame() {
+            if (!isRunning) return;
+
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = canvas.toDataURL('image/jpeg', 0.8);
+
+            try {
+                const response = await fetch("{% url 'api_recognize_realtime' %}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: imageData })
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.faces && data.faces.length > 0) {
+                    drawFaces(data.faces);
+                    updateStats(data.faces);
+                    logRecognitions(data.faces);
+                } else {
+                    overlay.innerHTML = '';
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function drawFaces(faces) {
+            overlay.innerHTML = '';
+
+            faces.forEach(face => {
+                const { x, y, w, h } = face.bbox;
+                const scaleX = video.offsetWidth / canvas.width;
+                const scaleY = video.offsetHeight / canvas.height;
+
+                // Box del rostro
+                const box = document.createElement('div');
+                box.className = 'face-box';
+                box.style.left = `${x * scaleX}px`;
+                box.style.top = `${y * scaleY}px`;
+                box.style.width = `${w * scaleX}px`;
+                box.style.height = `${h * scaleY}px`;
+
+                if (face.status === 'confirmed') {
+                    box.style.borderColor = '#00ff00';  // Verde: >90%
+                } else if (face.status === 'low_confidence') {
+                    box.style.borderColor = '#ffff00';  // Amarillo: 70-90%
+                } else {
+                    box.style.borderColor = '#ff0000';  // Rojo: <70% o desconocido
+                }
+
+                // Label del rostro
+                const label = document.createElement('div');
+                label.className = 'face-label';
+                label.style.left = `${x * scaleX}px`;
+                label.style.top = `${(y - 30) * scaleY}px`;
+                label.style.backgroundColor = box.style.borderColor;
+                label.style.color = face.status === 'low_confidence' ? '#000' : '#fff';
+                label.textContent = `${face.name} (${face.confidence_pct})`;
+
+                overlay.appendChild(box);
+                overlay.appendChild(label);
+            });
+        }
+
+        function updateStats(faces) {
+            stats.facesDetected += faces.length;
+            
+            faces.forEach(face => {
+                if (face.status === 'confirmed' || face.status === 'low_confidence') {
+                    stats.recognitions++;
+                    stats.confidenceSum += face.confidence;
+                    stats.confidenceCount++;
+                }
+            });
+
+            document.getElementById('faces-detected').textContent = stats.facesDetected;
+            document.getElementById('recognitions-count').textContent = stats.recognitions;
+            
+            const avgConf = stats.confidenceCount > 0 ? 
+                (stats.confidenceSum / stats.confidenceCount * 100).toFixed(1) : 0;
+            document.getElementById('avg-confidence').textContent = avgConf + '%';
+        }
+
+        function logRecognitions(faces) {
+            const log = document.getElementById('recognition-log');
+            
+            faces.forEach(face => {
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                
+                if (face.status === 'confirmed') {
+                    entry.classList.add('success');
+                } else if (face.status === 'possible') {
+                    entry.classList.add('warning');
+                } else {
+                    entry.classList.add('danger');
+                }
+
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('es-ES');
+
+                entry.innerHTML = `
+                    <div>
+                        <strong>${face.label}</strong><br>
+                        <small>Confianza: ${(face.confidence * 100).toFixed(1)}%</small>
+                    </div>
+                    <div class="log-time">${timeStr}</div>
+                `;
+
+                log.insertBefore(entry, log.firstChild);
+
+                // Mantener solo últimas 10 entradas
+                while (log.children.length > 10) {
+                    log.removeChild(log.lastChild);
+                }
+            });
+        }
+
+        function updateActiveTime() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('active-time').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Inicializar cámara al cargar
+        window.addEventListener('load', initCamera);
+
+        // Limpiar al salir
+        window.addEventListener('beforeunload', () => {
+            if (video && video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+            }
+        });
+    </script>
+</body>
+</html>
