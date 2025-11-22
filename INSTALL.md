@@ -5,8 +5,7 @@
 ### 1️⃣ Clonar y Entrar
 
 ```bash
-git clone https://github.com/TU_USUARIO/face-recognition-django.git
-cd face-recognition-django
+git clone https://github.com/LUISALEXANDERQUISHPE/AI_ReconocimientoFacial.git
 ```
 
 ### 2️⃣ Crear Entorno Virtual

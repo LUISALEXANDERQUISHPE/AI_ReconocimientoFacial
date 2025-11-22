@@ -8,17 +8,11 @@
 
 ```bash
 # Fork el repositorio en GitHub, luego:
-git clone https://github.com/TU_USUARIO/TU_FORK.git
-cd TU_FORK
+git clone https://github.com/LUISALEXANDERQUISHPE/AI_ReconocimientoFacial.git
+cd main
 ```
 
-### 2. Crear Rama
 
-```bash
-git checkout -b feature/nombre-funcionalidad
-# o
-git checkout -b fix/descripcion-bug
-```
 
 **Convenciones de nombres:**
 - `feature/` - Nuevas funcionalidades
