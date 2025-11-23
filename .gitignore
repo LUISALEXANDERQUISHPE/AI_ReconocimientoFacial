@@ -20,7 +20,7 @@ __pycache__/
 db.sqlite3
 db.sqlite3-journal
 *.db
-
+import_dataset.py
 # ---- Modelos Entrenados (PESADOS) ----
 # Los archivos .h5 pueden ser de 1-10 MB cada uno
 media/models/*.h5
@@ -76,6 +76,11 @@ dist/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# ---- Static Files (solo archivos recopilados) ----
+# Mantener static de apps pero ignorar staticfiles generados
+staticfiles/
+static_root/
 
 # ---- Otros Archivos Temporales ----
 *.bak

@@ -13,12 +13,12 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f6fa;
+            background: #fbfdfc;
         }
 
         /* Navbar */
         .navbar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0e457f 0%, #069bd8 100%);
             color: white;
             padding: 20px 40px;
             display: flex;
@@ -63,7 +63,7 @@
 
         .btn-logout:hover {
             background: white;
-            color: #667eea;
+            color: #0e457f;
         }
 
         /* Container */
@@ -87,6 +87,7 @@
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             transition: transform 0.3s;
+            border: 1px solid #e0e0e0;
         }
 
         .stat-card:hover {
@@ -147,13 +148,13 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0e457f 0%, #069bd8 100%);
             color: white;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 5px 15px rgba(14, 69, 127, 0.3);
         }
 
         .btn-success {
@@ -246,7 +247,7 @@
         }
 
         .action-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0e457f 0%, #069bd8 100%);
             color: white;
             padding: 20px;
             border-radius: 10px;
@@ -277,7 +278,7 @@
 
         .spinner {
             border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
+            border-top: 4px solid #0e457f;
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -289,13 +290,105 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* Modal de Mensajes */
+        .message-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .message-modal.active {
+            display: flex;
+        }
+
+        .message-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .message-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .message-icon.success { color: #28a745; }
+        .message-icon.error { color: #dc3545; }
+        .message-icon.warning { color: #ffc107; }
+
+        .message-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .message-text {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .message-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .message-btn {
+            background: linear-gradient(135deg, #0e457f 0%, #069bd8 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .message-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .message-btn.secondary {
+            background: #6c757d;
+        }
+
+        .message-btn.danger {
+            background: #dc3545;
+        }
     </style>
 </head>
 <body>
     <!-- Navbar -->
     <div class="navbar">
         <div class="navbar-brand">
-            🔐 Face Recognition System
+            Face Recognition System
         </div>
         <div class="navbar-user">
             <div class="user-info">
@@ -316,12 +409,12 @@
                 <div class="stat-value" id="total-persons">-</div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">✅</div>
+                <div class="stat-icon">✓</div>
                 <div class="stat-label">Reconocimientos Hoy</div>
                 <div class="stat-value" id="today-recognitions">-</div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">🧠</div>
+                <div class="stat-icon">AI</div>
                 <div class="stat-label">Estado del Modelo</div>
                 <div class="stat-value" id="model-status" style="font-size: 1.2rem;">-</div>
             </div>
@@ -330,19 +423,19 @@
         <!-- Quick Actions -->
         <div class="section">
             <div class="section-header">
-                <h2 class="section-title">⚡ Acciones Rápidas</h2>
+                <h2 class="section-title">Acciones Rápidas</h2>
             </div>
             <div class="quick-actions">
                 <a href="{% url 'register' %}" class="action-card">
-                    <div class="action-icon">➕</div>
+                    <div class="action-icon">+</div>
                     <div class="action-label">Registrar Persona</div>
                 </a>
                 <a href="{% url 'train_model' %}" class="action-card">
-                    <div class="action-icon">🧠</div>
+                    <div class="action-icon">AI</div>
                     <div class="action-label">Entrenar Modelo</div>
                 </a>
                 <a href="{% url 'recognition' %}" class="action-card">
-                    <div class="action-icon">🎯</div>
+                    <div class="action-icon">◉</div>
                     <div class="action-label">Reconocimiento en Vivo</div>
                 </a>
             </div>
@@ -351,9 +444,9 @@
         <!-- Tabla de Personas -->
         <div class="section">
             <div class="section-header">
-                <h2 class="section-title">👥 Personas Registradas</h2>
+                <h2 class="section-title">Personas Registradas</h2>
                 <button class="btn btn-primary" onclick="loadPersons()">
-                    🔄 Actualizar
+                    Actualizar
                 </button>
             </div>
 
@@ -380,19 +473,92 @@
                 </table>
 
                 <div id="empty-state" class="empty-state">
-                    <div class="empty-state-icon">📋</div>
+                    <div class="empty-state-icon">∅</div>
                     <h3>No hay personas registradas</h3>
                     <p>Comienza registrando tu primera persona</p>
                     <br>
                     <a href="{% url 'register' %}" class="btn btn-primary">
-                        ➕ Registrar Primera Persona
+                        Registrar Primera Persona
                     </a>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Modal de Mensajes -->
+    <div id="message-modal" class="message-modal">
+        <div class="message-content">
+            <div class="message-icon" id="message-icon">✓</div>
+            <div class="message-title" id="message-title">Título</div>
+            <div class="message-text" id="message-text">Mensaje</div>
+            <div class="message-buttons" id="message-buttons">
+                <button class="message-btn" id="message-btn-primary" onclick="closeMessageModal()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Sistema de mensajes profesional
+        function showMessage(title, message, type = 'success', callback = null) {
+            const modal = document.getElementById('message-modal');
+            const icon = document.getElementById('message-icon');
+            const titleEl = document.getElementById('message-title');
+            const textEl = document.getElementById('message-text');
+            const buttonsContainer = document.getElementById('message-buttons');
+
+            icon.className = 'message-icon ' + type;
+            if (type === 'success') icon.textContent = '✓';
+            else if (type === 'error') icon.textContent = '✕';
+            else if (type === 'warning') icon.textContent = '⚠';
+
+            titleEl.textContent = title;
+            textEl.innerHTML = message;
+            
+            buttonsContainer.innerHTML = '<button class="message-btn" onclick="closeMessageModal()">Aceptar</button>';
+            
+            modal.classList.add('active');
+
+            if (callback) {
+                buttonsContainer.querySelector('button').onclick = function() {
+                    closeMessageModal();
+                    callback();
+                };
+            }
+        }
+
+        function showConfirm(title, message, onConfirm, onCancel = null) {
+            const modal = document.getElementById('message-modal');
+            const icon = document.getElementById('message-icon');
+            const titleEl = document.getElementById('message-title');
+            const textEl = document.getElementById('message-text');
+            const buttonsContainer = document.getElementById('message-buttons');
+
+            icon.className = 'message-icon warning';
+            icon.textContent = '⚠';
+            titleEl.textContent = title;
+            textEl.innerHTML = message;
+            
+            buttonsContainer.innerHTML = `
+                <button class="message-btn secondary" onclick="closeMessageModal()">
+                    Cancelar
+                </button>
+                <button class="message-btn danger" id="confirm-btn">
+                    Confirmar
+                </button>
+            `;
+            
+            modal.classList.add('active');
+
+            document.getElementById('confirm-btn').onclick = function() {
+                closeMessageModal();
+                if (onConfirm) onConfirm();
+            };
+        }
+
+        function closeMessageModal() {
+            document.getElementById('message-modal').classList.remove('active');
+        }
+
         // Cargar estadísticas
         async function loadStats() {
             try {
@@ -453,7 +619,7 @@
                             </td>
                             <td>
                                 <button class="btn btn-danger btn-sm" onclick="deletePerson('${person.id}', '${person.name}')">
-                                    🗑️ Eliminar
+                                    Eliminar
                                 </button>
                             </td>
                         `;
@@ -472,32 +638,48 @@
 
         // Eliminar persona
         async function deletePerson(personId, personName) {
-            if (!confirm(`¿Estás seguro de eliminar a "${personName}"?\n\nEsta acción no se puede deshacer.`)) {
-                return;
-            }
+            showConfirm(
+                'Confirmar Eliminación',
+                `¿Estás seguro de eliminar a <strong>${personName}</strong>?<br><br>Esta acción no se puede deshacer y eliminará:<br>- Todos los encodings faciales<br>- Historial de reconocimientos<br>- Muestras visuales`,
+                async function() {
+                    try {
+                        const response = await fetch("{% url 'api_delete_person' %}", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken')
+                            },
+                            body: JSON.stringify({ person_id: personId })
+                        });
 
-            try {
-                const response = await fetch("{% url 'api_delete_person' %}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')
-                    },
-                    body: JSON.stringify({ person_id: personId })
-                });
+                        const data = await response.json();
 
-                const data = await response.json();
-
-                if (data.success) {
-                    alert('✅ Persona eliminada exitosamente');
-                    loadPersons();
-                    loadStats();
-                } else {
-                    alert('❌ Error: ' + data.error);
+                        if (data.success) {
+                            showMessage(
+                                'Eliminación Exitosa',
+                                `<strong>${personName}</strong> ha sido eliminado correctamente del sistema.`,
+                                'success',
+                                function() {
+                                    loadPersons();
+                                    loadStats();
+                                }
+                            );
+                        } else {
+                            showMessage(
+                                'Error al Eliminar',
+                                data.error || 'No se pudo eliminar la persona. Intenta nuevamente.',
+                                'error'
+                            );
+                        }
+                    } catch (error) {
+                        showMessage(
+                            'Error de Conexión',
+                            `No se pudo conectar con el servidor.<br><br><strong>Detalles:</strong> ${error.message}`,
+                            'error'
+                        );
+                    }
                 }
-            } catch (error) {
-                alert('❌ Error de conexión: ' + error.message);
-            }
+            );
         }
 
         function getCookie(name) {

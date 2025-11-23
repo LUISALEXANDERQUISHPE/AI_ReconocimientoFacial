@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0e457f 0%, #069bd8 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -21,14 +21,14 @@
         .container {
             max-width: 800px;
             margin: 0 auto;
-            background: white;
+            background: #fbfdfc;
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             overflow: hidden;
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0e457f 0%, #069bd8 100%);
             color: white;
             padding: 30px;
             text-align: center;
@@ -81,7 +81,7 @@
         }
 
         .step.active .step-number {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0e457f 0%, #069bd8 100%);
             color: white;
         }
 
@@ -96,7 +96,7 @@
         }
 
         .step.active .step-label {
-            color: #667eea;
+            color: #0e457f;
             font-weight: 600;
         }
 
@@ -138,7 +138,7 @@
         .form-group input:focus,
         .form-group select:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #0e457f;
         }
 
         /* Camera */
@@ -211,13 +211,13 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0e457f 0%, #069bd8 100%);
             color: white;
         }
 
         .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 5px 20px rgba(14, 69, 127, 0.4);
         }
 
         .btn-secondary {
@@ -236,7 +236,7 @@
 
         .info-box {
             background: #e7f3ff;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #0e457f;
             padding: 15px;
             margin-bottom: 20px;
             border-radius: 4px;
@@ -275,7 +275,7 @@
 
         .spinner {
             border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
+            border-top: 4px solid #0e457f;
             border-radius: 50%;
             width: 50px;
             height: 50px;
@@ -287,12 +287,103 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* Modal de Mensajes */
+        .message-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .message-modal.active {
+            display: flex;
+        }
+
+        .message-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .message-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .message-icon.success {
+            color: #28a745;
+        }
+
+        .message-icon.error {
+            color: #dc3545;
+        }
+
+        .message-icon.warning {
+            color: #ffc107;
+        }
+
+        .message-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .message-text {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .message-btn {
+            background: linear-gradient(135deg, #0e457f 0%, #069bd8 100%);
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .message-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .message-btn.secondary {
+            background: #6c757d;
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>📝 Registro de Usuario</h1>
+            <h1>Registro de Usuario</h1>
             <p>Sistema de Reconocimiento Facial</p>
         </div>
 
@@ -315,7 +406,7 @@
         <div class="content">
             <!-- PASO 1: Datos Personales -->
             <div class="step-content active" id="step-1">
-                <h2>📋 Datos Personales</h2>
+                <h2>Datos Personales</h2>
                 <div class="info-box">
                     Por favor completa tus datos para crear tu cuenta
                 </div>
@@ -353,11 +444,11 @@
 
             <!-- PASO 2: Captura Facial -->
             <div class="step-content" id="step-2">
-                <h2>📸 Captura de Huellas Faciales</h2>
+                <h2>Captura de Huellas Faciales</h2>
                 <div class="info-box">
                     Capturaremos múltiples imágenes de tu rostro para entrenar el sistema.
-                    <br><strong>🎯 Objetivo: 300 huellas faciales + 6 muestras visuales</strong>
-                    <br><small>⚡ Captura rápida: ~15-20 segundos total</small>
+                    <br><strong>Objetivo: 400-600 huellas faciales + 6 muestras visuales</strong>
+                    <br><small>Captura rápida: ~15-20 segundos total</small>
                 </div>
 
                 <div class="camera-container">
@@ -375,7 +466,7 @@
                 <div class="buttons">
                     <button class="btn btn-secondary" onclick="goToStep(1)">← Atrás</button>
                     <button class="btn btn-primary" id="start-capture-btn" onclick="startCapture()">
-                        ▶️ Iniciar Captura
+                        Iniciar Captura
                     </button>
                     <button class="btn btn-primary" id="next-step-btn" onclick="goToStep(3)" disabled>
                         Siguiente →
@@ -385,7 +476,7 @@
 
             <!-- PASO 3: Confirmación -->
             <div class="step-content" id="step-3">
-                <div class="success-icon">✅</div>
+                <div class="success-icon">✓</div>
                 <h2 style="text-align: center;">¡Registro Completado!</h2>
                 
                 <div class="summary">
@@ -402,11 +493,11 @@
                         <span id="summary-department"></span>
                     </div>
                     <div class="summary-item">
-                        <strong>🔢 Encodings capturados:</strong>
+                        <strong>Encodings capturados:</strong>
                         <span id="summary-encodings">0</span>
                     </div>
                     <div class="summary-item">
-                        <strong>🖼️ Muestras visuales:</strong>
+                        <strong>Muestras visuales:</strong>
                         <span id="summary-samples">0</span>
                     </div>
                 </div>
@@ -419,7 +510,7 @@
                 <div class="buttons">
                     <button class="btn btn-secondary" onclick="goToStep(2)">← Volver a capturar</button>
                     <button class="btn btn-primary" onclick="finishRegistration()">
-                        🎉 Finalizar Registro
+                        Finalizar Registro
                     </button>
                 </div>
 
@@ -430,15 +521,60 @@
         </div>
     </div>
 
+    <!-- Modal de Mensajes -->
+    <div id="message-modal" class="message-modal">
+        <div class="message-content">
+            <div class="message-icon" id="message-icon">✓</div>
+            <div class="message-title" id="message-title">Título</div>
+            <div class="message-text" id="message-text">Mensaje</div>
+            <button class="message-btn" id="message-btn-primary" onclick="closeMessageModal()">Aceptar</button>
+        </div>
+    </div>
+
     <script>
+        // Sistema de mensajes profesional
+        function showMessage(title, message, type = 'success', callback = null) {
+            const modal = document.getElementById('message-modal');
+            const icon = document.getElementById('message-icon');
+            const titleEl = document.getElementById('message-title');
+            const textEl = document.getElementById('message-text');
+            const btnPrimary = document.getElementById('message-btn-primary');
+
+            // Configurar icono y estilos según tipo
+            icon.className = 'message-icon ' + type;
+            if (type === 'success') {
+                icon.textContent = '✓';
+            } else if (type === 'error') {
+                icon.textContent = '✕';
+            } else if (type === 'warning') {
+                icon.textContent = '⚠';
+            }
+
+            titleEl.textContent = title;
+            textEl.innerHTML = message;
+            modal.classList.add('active');
+
+            // Configurar callback si existe
+            btnPrimary.onclick = function() {
+                closeMessageModal();
+                if (callback) callback();
+            };
+        }
+
+        function closeMessageModal() {
+            document.getElementById('message-modal').classList.remove('active');
+        }
+
         let currentStep = 1;
         let capturedEncodings = [];
         let sampleImages = []; // 6 muestras visuales para trazabilidad
         let video, canvas, ctx;
         let capturing = false;
         let captureInterval;
-        const TARGET_ENCODINGS = 300;
-        const SAMPLE_INTERVAL = 50; // Guardar muestra cada 50 frames (6 muestras totales)
+        const MIN_ENCODINGS = 400;
+        const MAX_ENCODINGS = 600;
+        let TARGET_ENCODINGS = Math.floor(Math.random() * (MAX_ENCODINGS - MIN_ENCODINGS + 1)) + MIN_ENCODINGS; // Entre 400-600 aleatorio
+        const SAMPLE_INTERVAL = Math.floor(TARGET_ENCODINGS / 6); // 6 muestras distribuidas
 
         const formData = {
             nombre: '',
@@ -451,7 +587,7 @@
             if (step === 2 && currentStep === 1) {
                 const nombre = document.getElementById('nombre').value.trim();
                 if (!nombre) {
-                    alert('Por favor ingresa tu nombre');
+                    showMessage('Campo requerido', 'Por favor ingresa tu nombre completo para continuar.', 'warning');
                     return;
                 }
                 formData.nombre = nombre;
@@ -462,7 +598,11 @@
             // Validar paso 2
             if (step === 3 && currentStep === 2) {
                 if (capturedEncodings.length < 10) {
-                    alert('Necesitas al menos 10 huellas faciales para continuar');
+                    showMessage(
+                        'Captura insuficiente', 
+                        `Has capturado ${capturedEncodings.length} huellas faciales.<br><strong>Necesitas al menos 10 para continuar.</strong><br><br>Por favor, regresa y captura más imágenes de tu rostro.`, 
+                        'warning'
+                    );
                     return;
                 }
             }
@@ -511,10 +651,10 @@
                 video.onloadedmetadata = () => {
                     canvas.width = video.videoWidth;
                     canvas.height = video.videoHeight;
-                    document.getElementById('capture-message').textContent = '✅ Cámara lista';
+                    document.getElementById('capture-message').textContent = 'Cámara lista';
                 };
             } catch (error) {
-                document.getElementById('capture-message').textContent = '❌ Error: ' + error.message;
+                document.getElementById('capture-message').textContent = ' Error: ' + error.message;
             }
         }
 
@@ -527,8 +667,8 @@
             capturing = true;
             capturedEncodings = []; // Reiniciar
             sampleImages = [];
-            document.getElementById('start-capture-btn').textContent = '⏸️ Pausar Captura';
-            document.getElementById('capture-message').textContent = '⚡ Capturando rápido... Mueve tu rostro lentamente';
+            document.getElementById('start-capture-btn').textContent = 'Pausar Captura';
+            document.getElementById('capture-message').textContent = 'Capturando rápido... Mueve tu rostro lentamente';
             document.getElementById('next-step-btn').disabled = true;
 
             // Captura rápida: 60-70ms por frame = ~15 fps
@@ -538,8 +678,8 @@
         function stopCapture() {
             capturing = false;
             clearInterval(captureInterval);
-            document.getElementById('start-capture-btn').textContent = '▶️ Continuar Captura';
-            document.getElementById('capture-message').textContent = '⏸️ Captura pausada';
+            document.getElementById('start-capture-btn').textContent = 'Continuar Captura';
+            document.getElementById('capture-message').textContent = 'Captura pausada';
         }
 
         async function captureFrame() {
@@ -571,21 +711,21 @@
                     // Guardar muestra visual cada 50 frames (total: 6 muestras)
                     if (capturedEncodings.length % SAMPLE_INTERVAL === 0 && sampleImages.length < 6) {
                         sampleImages.push(imageData);
-                        console.log(`✅ Muestra ${sampleImages.length}/6 guardada`);
+                        console.log(`Muestra ${sampleImages.length}/6 guardada`);
                     }
 
                     updateCaptureUI();
 
                     if (capturedEncodings.length >= TARGET_ENCODINGS) {
                         stopCapture();
-                        document.getElementById('capture-message').textContent = `✅ ¡Captura completa! ${TARGET_ENCODINGS} encodings + ${sampleImages.length} muestras`;
+                        document.getElementById('capture-message').textContent = ` ¡Captura completa! ${TARGET_ENCODINGS} encodings + ${sampleImages.length} muestras`;
                         document.getElementById('next-step-btn').disabled = false;
                         document.getElementById('start-capture-btn').disabled = true;
                     }
                 }
             } catch (error) {
                 console.error('Error capturando:', error);
-                document.getElementById('capture-message').textContent = '⚠️ Error: ' + error.message;
+                document.getElementById('capture-message').textContent = ' Error: ' + error.message;
             }
         }
 
@@ -614,7 +754,7 @@
             document.getElementById('loading').style.display = 'block';
 
             try {
-                console.log(`🚀 Enviando ${capturedEncodings.length} encodings + ${sampleImages.length} muestras...`);
+                console.log(` Enviando ${capturedEncodings.length} encodings + ${sampleImages.length} muestras...`);
                 
                 const response = await fetch("{% url 'api_register_complete' %}", {
                     method: 'POST',
@@ -631,13 +771,27 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    alert(`✅ ¡Registro exitoso!\n\n${data.message}\n\nAhora puedes iniciar sesión después de que un administrador entrene el modelo.`);
-                    window.location.href = "{% url 'login' %}";
+                    showMessage(
+                        '¡Registro Exitoso!',
+                        `<strong>${data.message}</strong><br><br>Tu información ha sido guardada correctamente.<br><br>Un administrador debe entrenar el modelo para que puedas iniciar sesión.`,
+                        'success',
+                        function() {
+                            window.location.href = "{% url 'login' %}";
+                        }
+                    );
                 } else {
-                    alert('❌ Error: ' + data.error);
+                    showMessage(
+                        'Error en el Registro',
+                        data.error || 'No se pudo completar el registro. Por favor, intenta nuevamente.',
+                        'error'
+                    );
                 }
             } catch (error) {
-                alert('❌ Error de conexión: ' + error.message);
+                showMessage(
+                    'Error de Conexión',
+                    `No se pudo conectar con el servidor.<br><br><strong>Detalles:</strong> ${error.message}<br><br>Verifica tu conexión e intenta nuevamente.`,
+                    'error'
+                );
             } finally {
                 document.getElementById('loading').style.display = 'none';
             }

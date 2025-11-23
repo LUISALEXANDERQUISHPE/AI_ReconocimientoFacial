@@ -1,4 +1,5 @@
 <!-- templates/face_recognition/login.html -->
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -14,7 +15,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0e457f 0%, #069bd8 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -23,9 +24,9 @@
         }
 
         .login-container {
-            background: white;
+            background: #fbfdfc;
             border-radius: 20px;
-            padding: 40px;
+            padding: 20px;
             max-width: 480px;
             width: 100%;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
@@ -33,11 +34,11 @@
         }
 
         .logo {
-            width: 100px;
-            height: 100px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 50%;
-            margin: 0 auto 20px;
+            width: 250px;
+            height: 250px;
+            background: url("{% static 'face_recognition/img/logo.svg' %}") center/contain no-repeat;
+            border-radius: 30%;
+            margin: 0 auto ;
         }
 
         h1 {
@@ -68,24 +69,25 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0e457f 0%, #069bd8 100%);
             color: white;
             margin-bottom: 30px;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 10px 25px rgba(14, 69, 127, 0.4);
         }
 
         .btn-secondary {
             background: white;
-            color: #667eea;
-            border: 2px solid #667eea;
+            color: #0e457f;
+            border: 2px solid #0e457f;
         }
 
         .btn-secondary:hover {
-            background: #f8f9ff;
+            background: #78bde9;
+            color: white;
         }
 
         .divider {
@@ -171,7 +173,7 @@
             background: white;
             border-radius: 20px;
             padding: 30px;
-            max-width: 500px;
+            max-width: 1000px;
             width: 90%;
             position: relative;
         }
@@ -248,13 +250,12 @@
 <body>
     <div class="login-container">
         <div class="logo"></div>
-        <h1>FacialAuth</h1>
         <p class="subtitle">Sistema Empresarial de Reconocimiento Facial</p>
 
         <div id="message-container"></div>
 
         <button class="btn btn-primary" onclick="openFacialLogin()">
-            📸 Iniciar Sesión con Rostro
+            Iniciar Sesión con Rostro
         </button>
 
         <div class="divider">¿Nuevo usuario?</div>
@@ -262,7 +263,7 @@
         <p class="info-text">Regístrate para acceder al sistema</p>
 
         <button class="btn btn-secondary" onclick="window.location.href='{% url 'register' %}'">
-            👤 Crear Cuenta
+            Crear Cuenta
         </button>
 
         <div class="status">
@@ -280,7 +281,7 @@
     <div id="facial-modal" class="modal">
         <div class="modal-content">
             <button class="close-modal" onclick="closeFacialLogin()">✕</button>
-            <h2 style="margin-bottom: 20px;">🔐 Reconocimiento Facial</h2>
+            <h2 style="margin-bottom: 20px;">Reconocimiento Facial</h2>
             
             <div class="video-container">
                 <video id="video" autoplay></video>
@@ -292,7 +293,7 @@
             </div>
 
             <button class="btn btn-primary" id="recognize-btn" onclick="recognizeFace()" disabled>
-                🎯 Reconociendo...
+                Reconociendo...
             </button>
         </div>
     </div>
@@ -331,7 +332,7 @@
                     overlayCanvas.width = video.videoWidth;
                     overlayCanvas.height = video.videoHeight;
                     
-                    document.getElementById('status-text').textContent = '✅ Cámara lista';
+                    document.getElementById('status-text').textContent = ' Cámara lista';
                     document.getElementById('recognize-btn').disabled = false;
                     
                     // Iniciar reconocimiento automático
@@ -339,7 +340,7 @@
                 };
             })
             .catch(err => {
-                document.getElementById('status-text').textContent = '❌ Error: ' + err;
+                document.getElementById('status-text').textContent = ' Error: ' + err;
             });
         }
 
@@ -356,7 +357,7 @@
 
         function startRecognition() {
             recognizing = true;
-            document.getElementById('status-text').textContent = '🎯 Reconociendo...';
+            document.getElementById('status-text').textContent = ' Reconociendo...';
 
             recognitionInterval = setInterval(() => {
                 if (!recognizing) return;
@@ -377,7 +378,7 @@
                     if (data.success && data.authenticated) {
                         stopRecognition();
                         document.getElementById('status-text').innerHTML = 
-                            `✅ <strong>Bienvenido ${data.name}!</strong><br>Confianza: ${(data.confidence * 100).toFixed(1)}%`;
+                            ` <strong>Bienvenido ${data.name}!</strong><br>Confianza: ${(data.confidence * 100).toFixed(1)}%`;
                         
                         setTimeout(() => {
                             window.location.href = data.redirect_url;
@@ -392,20 +393,20 @@
                             document.getElementById('status-text').innerHTML = face.message;
                         } else if (face.status === 'no_model') {
                             document.getElementById('status-text').innerHTML = 
-                                '⚠️ <strong>Sin modelo entrenado</strong><br>Ve a <a href="/train/" style="color: #fff;">entrenar modelo</a>';
+                                ' <strong>Sin modelo entrenado</strong><br>Ve a <a href="/train/" style="color: #fff;">entrenar modelo</a>';
                         } else if (face.confidence < 0.50) {
                             document.getElementById('status-text').innerHTML = 
-                                `❓ <strong>No reconocido</strong><br>Confianza: ${(face.confidence * 100).toFixed(1)}%`;
+                                ` <strong>No reconocido</strong><br>Confianza: ${(face.confidence * 100).toFixed(1)}%`;
                         } else if (face.confidence < 0.90) {
                             document.getElementById('status-text').innerHTML = 
-                                `⚠️ <strong>${face.name}</strong><br>Confianza insuficiente: ${(face.confidence * 100).toFixed(1)}% (requiere >90%)`;
+                                ` <strong>${face.name}</strong><br>Confianza insuficiente: ${(face.confidence * 100).toFixed(1)}% (requiere >90%)`;
                         }
                     } else if (data.message) {
                         document.getElementById('status-text').innerHTML = data.message;
                     } else {
                         overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
                         document.getElementById('status-text').textContent = 
-                            '👤 Buscando rostro...';
+                            ' Buscando rostro...';
                     }
                 })
                 .catch(err => {
@@ -418,10 +419,6 @@
         function stopRecognition() {
             recognizing = false;
             clearInterval(recognitionInterval);
-        }
-
-        function recognizeFace() {
-            // Esta función ya no es necesaria porque el reconocimiento es automático
         }
 
         function drawRecognitions(faces) {

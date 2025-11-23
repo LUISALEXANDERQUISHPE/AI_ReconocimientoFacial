@@ -19,7 +19,7 @@
 
         /* Header */
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0e457f 0%, #069bd8 100%);
             padding: 20px 40px;
             display: flex;
             justify-content: space-between;
@@ -42,7 +42,7 @@
 
         .btn-back:hover {
             background: white;
-            color: #667eea;
+            color: #0e457f;
         }
 
         /* Container */
@@ -277,15 +277,15 @@
         }
 
         .model-info {
-            background: rgba(102, 126, 234, 0.1);
-            border: 1px solid #667eea;
+            background: rgba(14, 69, 127, 0.1);
+            border: 1px solid #0e457f;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 15px;
         }
 
         .model-info h4 {
-            color: #667eea;
+            color: #0e457f;
             margin-bottom: 10px;
         }
 
@@ -302,14 +302,14 @@
 </head>
 <body>
     <div class="header">
-        <h1>🎯 Reconocimiento Facial en Tiempo Real</h1>
+        <h1>Reconocimiento Facial en Tiempo Real</h1>
         <a href="{% url 'dashboard' %}" class="btn-back">← Volver al Dashboard</a>
     </div>
 
     <div class="container">
         {% if not model_loaded %}
         <div class="alert alert-warning">
-            ⚠️ <strong>Modelo no cargado:</strong> Necesitas entrenar el modelo primero.
+            <strong>Modelo no cargado:</strong> Necesitas entrenar el modelo primero.
             <a href="{% url 'train_model' %}" style="color: #856404; text-decoration: underline;">
                 Ir a entrenar modelo
             </a>
@@ -337,20 +337,20 @@
 
                 <div class="controls">
                     <button class="btn btn-primary" id="start-btn" onclick="startRecognition()" {% if not model_loaded %}disabled{% endif %}>
-                        ▶️ Iniciar Reconocimiento
+                        Iniciar Reconocimiento
                     </button>
                     <button class="btn btn-danger" id="stop-btn" onclick="stopRecognition()" disabled>
-                        ⏸️ Detener
+                        Detener
                     </button>
                 </div>
 
                 {% if model_loaded and available_classes %}
                 <div class="model-info">
-                    <h4>📊 Modelo Cargado</h4>
+                    <h4>Modelo Cargado</h4>
                     <ul>
-                        <li>✅ Modelo activo y listo</li>
-                        <li>👥 Clases disponibles: {{ available_classes|length }}</li>
-                        <li>🎯 Personas: {% for name in available_classes %}{{ name }}{% if not forloop.last %}, {% endif %}{% endfor %}</li>
+                        <li>✓ Modelo activo y listo</li>
+                        <li>Clases disponibles: {{ available_classes|length }}</li>
+                        <li>Personas: {% for name in available_classes %}{{ name }}{% if not forloop.last %}, {% endif %}{% endfor %}</li>
                     </ul>
                 </div>
                 {% endif %}
@@ -359,7 +359,7 @@
             <!-- Info Section -->
             <div class="info-section">
                 <div class="info-card">
-                    <h3>📊 Estadísticas en Tiempo Real</h3>
+                    <h3>Estadísticas en Tiempo Real</h3>
                     <div class="stat-row">
                         <span class="stat-label">Rostros detectados:</span>
                         <span class="stat-value" id="faces-detected">0</span>
@@ -379,7 +379,7 @@
                 </div>
 
                 <div class="info-card">
-                    <h3>📝 Registro de Reconocimientos</h3>
+                    <h3>Registro de Reconocimientos</h3>
                     <div id="recognition-log"></div>
                 </div>
             </div>

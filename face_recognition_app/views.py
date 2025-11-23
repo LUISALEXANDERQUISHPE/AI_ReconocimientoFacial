@@ -6,6 +6,8 @@ from django.contrib import messages
 from django.views.decorators.http import require_http_methods
 import json
 import time
+import os
+import shutil
 from datetime import datetime, timedelta
 from pymongo import MongoClient
 from .utils import FaceRecognitionUtils, ModelTrainer
@@ -23,10 +25,11 @@ try:
     encodings_collection = mongo_db['face_encodings']
     trainings_collection = mongo_db['model_trainings']
     logs_collection = mongo_db['recognition_logs']
+    recognition_logs_collection = mongo_db['recognition_logs']  # Alias para consistencia
     mongo_client.admin.command('ping')
-    print("✅ MongoDB conectado exitosamente")
+    print(" MongoDB conectado exitosamente")
 except Exception as e:
-    print(f"❌ Error conectando a MongoDB: {e}")
+    print(f" Error conectando a MongoDB: {e}")
     mongo_client = None
 
 # Instancia global de utilidades
@@ -57,7 +60,7 @@ def dashboard(request):
         
         # Si no hay modelo entrenado, permitir acceso directo
         if not model_exists:
-            messages.info(request, '⚠️ Modo administrador: No hay modelo entrenado. Por favor entrena el modelo primero.')
+            messages.info(request, ' Modo administrador: No hay modelo entrenado. Por favor entrena el modelo primero.')
             request.session['authenticated'] = True
             request.session['user_name'] = 'Administrador'
             request.session['user_department'] = 'Sistema'
@@ -113,7 +116,7 @@ def api_recognize_login(request):
             return JsonResponse({
                 'success': True,
                 'authenticated': False,
-                'message': '⚠️ No hay modelo entrenado. Ve a /train/ para entrenar.',
+                'message': ' No hay modelo entrenado. Ve a /train/ para entrenar.',
                 'faces': [{
                     'bbox': {'x': int(x), 'y': int(y), 'w': int(w), 'h': int(h)},
                     'name': 'Desconocido',
@@ -123,7 +126,7 @@ def api_recognize_login(request):
                 }]
             })
         
-        if name is not None and confidence > 0.90:  # Umbral del 90%
+        if name is not None and confidence > 0.97:  # Umbral del 95%
             # Buscar persona en MongoDB
             person = persons_collection.find_one({'name': name})
             
@@ -160,18 +163,18 @@ def api_recognize_login(request):
             
             if name:
                 confidence_pct = f"{confidence * 100:.1f}%"
-                if confidence > 0.90:
+                if confidence > 0.97:
                     status = 'confirmed'
                     label = f'{name} ({confidence_pct})'
-                    message = f'✅ Reconocido: {name} - Confianza: {confidence_pct}'
-                elif confidence > 0.70:
+                    message = f' Reconocido: {name} - Confianza: {confidence_pct}'
+                elif confidence > 0.90:
                     status = 'insufficient'
                     label = f'{name} - Insuficiente ({confidence_pct})'
-                    message = f'⚠️ Confianza insuficiente: {confidence_pct} (se requiere >90%)'
+                    message = f' Confianza insuficiente: {confidence_pct} (se requiere >95%)'
                 else:
                     status = 'unknown'
                     label = f'Desconocido ({confidence_pct})'
-                    message = f'❌ No reconocido - Confianza muy baja: {confidence_pct}'
+                    message = f' No reconocido - Confianza muy baja: {confidence_pct}'
                 
                 face_info.append({
                     'bbox': {'x': int(x), 'y': int(y), 'w': int(w), 'h': int(h)},
@@ -188,7 +191,7 @@ def api_recognize_login(request):
                     'label': 'Entrenar modelo',
                     'confidence': 0.0,
                     'status': 'no_model',
-                    'message': '⚠️ Entrena el modelo primero'
+                    'message': ' Entrena el modelo primero'
                 })
         
         return JsonResponse({
@@ -245,7 +248,7 @@ def api_register_complete(request):
                     
                     sample_paths.append(f'samples/{name.replace(" ", "_")}/sample_{idx+1}.jpg')
                 except Exception as e:
-                    print(f"⚠️ Error guardando muestra {idx+1}: {e}")
+                    print(f" Error guardando muestra {idx+1}: {e}")
         
         # Guardar UN SOLO documento con TODOS los encodings de la persona
         person_doc = {
@@ -279,7 +282,7 @@ def api_register_complete(request):
         
         return JsonResponse({
             'success': True,
-            'message': f'✅ Persona registrada con {len(face_encodings_list)} encodings + {len(sample_paths)} muestras',
+            'message': f'Persona registrada con {len(face_encodings_list)} encodings + {len(sample_paths)} muestras',
             'encoding_id': str(encoding_result.inserted_id),
             'total_encodings': len(face_encodings_list),
             'total_samples': len(sample_paths)
@@ -287,7 +290,7 @@ def api_register_complete(request):
         
     except Exception as e:
         import traceback
-        print(f"❌ Error en register_complete: {traceback.format_exc()}")
+        print(f" Error en register_complete: {traceback.format_exc()}")
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
 
 @csrf_exempt
@@ -297,7 +300,7 @@ def process_frame(request):
     try:
         data = json.loads(request.body)
         image_data = data.get('image')
-        person_name = data.get('person_name', 'temp')  # Nombre temporal
+        person_name = data.get('person_name', 'temp') 
         
         if not image_data:
             return JsonResponse({'success': False, 'error': 'No image data'}, status=400)
@@ -316,16 +319,6 @@ def process_frame(request):
             if encoding is not None:
                 import cv2
                 blur_score = cv2.Laplacian(cv2.cvtColor(face_roi, cv2.COLOR_BGR2GRAY), cv2.CV_64F).var()
-                
-                # OPCIONAL: Guardar imagen física (como tu script original)
-                # Descomenta si quieres guardar imágenes en dataset/
-                # import os
-                # from pathlib import Path
-                # dataset_dir = Path(settings.MEDIA_ROOT) / 'dataset' / person_name
-                # dataset_dir.mkdir(parents=True, exist_ok=True)
-                # img_count = len(list(dataset_dir.glob('*.jpg')))
-                # img_path = dataset_dir / f'img_{img_count:03d}.jpg'
-                # cv2.imwrite(str(img_path), face_roi)
                 
                 results.append({
                     'bbox': {'x': int(x), 'y': int(y), 'w': int(w), 'h': int(h)},
@@ -361,9 +354,9 @@ def api_dashboard_stats(request):
         )
         
         if latest_training:
-            model_status = f"✅ Entrenado ({latest_training['final_accuracy']:.0%})"
+            model_status = f" Entrenado ({latest_training['final_accuracy']:.0%})"
         else:
-            model_status = "⚠️ Sin entrenar"
+            model_status = " Sin entrenar"
         
         return JsonResponse({
             'success': True,
@@ -403,7 +396,7 @@ def api_persons_list(request):
 @csrf_exempt
 @require_http_methods(["POST"])
 def api_delete_person(request):
-    """API para eliminar persona"""
+    """API para eliminar persona completamente"""
     try:
         data = json.loads(request.body)
         person_id = data.get('person_id')
@@ -412,19 +405,54 @@ def api_delete_person(request):
             return JsonResponse({'success': False, 'error': 'No person_id'}, status=400)
         
         from bson import ObjectId
+        import shutil
         
-        # Eliminar encodings
-        encodings_collection.delete_many({'person_id': person_id})
+        # 1. Obtener información de la persona antes de eliminar
+        person = persons_collection.find_one({'_id': ObjectId(person_id)})
         
-        # Eliminar persona
+        if not person:
+            return JsonResponse({'success': False, 'error': 'Persona no encontrada'}, status=404)
+        
+        person_name = person.get('name')
+        
+        # 2. Eliminar encodings de MongoDB (usar person_name que es el campo correcto)
+        result_encodings = encodings_collection.delete_many({'person_name': person_name})
+        print(f" Eliminados {result_encodings.deleted_count} encodings de {person_name}")
+        
+        # 3. Eliminar carpeta de muestras en media/samples/NOMBRE_PERSONA/
+        samples_path = os.path.join(settings.MEDIA_ROOT, 'samples', person_name)
+        if os.path.exists(samples_path):
+            try:
+                shutil.rmtree(samples_path)
+                print(f" Carpeta eliminada: {samples_path}")
+            except Exception as e:
+                print(f" Error eliminando carpeta {samples_path}: {e}")
+        
+        # 4. Eliminar logs de reconocimiento (opcional, para limpiar historial)
+        try:
+            result_logs = recognition_logs_collection.delete_many({'person_name': person_name})
+            print(f" Eliminados {result_logs.deleted_count} logs de reconocimiento")
+        except Exception as e:
+            print(f" Error eliminando logs: {e}")
+        
+        # 5. Eliminar persona de MongoDB
         persons_collection.delete_one({'_id': ObjectId(person_id)})
+        print(f" Persona {person_name} eliminada completamente")
+        
+        # Verificar si la carpeta fue eliminada
+        folder_deleted = not os.path.exists(samples_path)
         
         return JsonResponse({
             'success': True,
-            'message': 'Persona eliminada exitosamente'
+            'message': f'Persona {person_name} eliminada completamente',
+            'deleted': {
+                'encodings': result_encodings.deleted_count,
+                'samples_folder': folder_deleted
+            }
         })
         
     except Exception as e:
+        print(f" Error en api_delete_person: {e}")
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
 
 def train_model_view(request):
@@ -442,8 +470,8 @@ def train_model_view(request):
                     'classes_file': result.get('classes_filename', 'clases.npy'),
                     'total_samples': result['total_samples'],
                     'num_classes': result['num_classes'],
-                    'final_accuracy': result['accuracy'] * 100,  # Convertir a porcentaje
-                    'final_val_accuracy': result.get('val_accuracy') * 100 if result.get('val_accuracy') else None,
+                    'final_accuracy': result['accuracy'],  # Guardar como decimal (0.0 a 1.0)
+                    'final_val_accuracy': result.get('val_accuracy') if result.get('val_accuracy') else None,
                     'training_time_seconds': result['training_time'],
                     'is_active': True
                 }
@@ -455,11 +483,11 @@ def train_model_view(request):
                 # Recargar el modelo en memoria
                 face_utils.load_model()
                 
-                messages.success(request, f"✅ ¡Modelo entrenado exitosamente! Precisión: {result['accuracy']:.1%} | Muestras: {result['total_samples']} | Clases: {result['num_classes']}")
+                messages.success(request, f" ¡Modelo entrenado exitosamente! Precisión: {result['accuracy']:.1%} | Muestras: {result['total_samples']} | Clases: {result['num_classes']}")
             else:
-                messages.error(request, f"❌ Error al entrenar: {result.get('error', 'Error desconocido')}")
+                messages.error(request, f" Error al entrenar: {result.get('error', 'Error desconocido')}")
         except Exception as e:
-            messages.error(request, f"❌ Error durante el entrenamiento: {str(e)}")
+            messages.error(request, f" Error durante el entrenamiento: {str(e)}")
         
         return redirect('train_model')
     
@@ -516,9 +544,9 @@ def api_recognize_realtime(request):
             face_roi = frame[y:y+h, x:x+w]
             name, confidence = face_utils.recognize_face(face_roi)
             
-            if name and confidence > 0.70:  # Umbral más bajo para mostrar info
+            if name and confidence > 0.90:  # Umbral más bajo para mostrar info
                 confidence_pct = f"{confidence * 100:.1f}%"
-                status = 'confirmed' if confidence > 0.90 else 'low_confidence'
+                status = 'confirmed' if confidence > 0.97 else 'low_confidence'
                 
                 faces_info.append({
                     'name': name,
@@ -544,7 +572,7 @@ def api_recognize_realtime(request):
         
     except Exception as e:
         import traceback
-        print(f"❌ Error en reconocimiento: {traceback.format_exc()}")
+        print(f" Error en reconocimiento: {traceback.format_exc()}")
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 def logout_view(request):

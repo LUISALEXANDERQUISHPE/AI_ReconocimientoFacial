@@ -14,11 +14,11 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f6fa;
+            background: #fbfdfc;
         }
         
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0e457f 0%, #069bd8 100%);
             color: white;
             padding: 20px 40px;
             display: flex;
@@ -107,7 +107,7 @@
     
     .spinner {
         border: 4px solid #f3f3f3;
-        border-top: 4px solid #667eea;
+        border-top: 4px solid #0e457f;
         border-radius: 50%;
         width: 50px;
         height: 50px;
@@ -133,14 +133,14 @@
     }
     
     .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #0e457f 0%, #069bd8 100%);
         color: white;
         width: 100%;
     }
     
     .btn-primary:hover:not(:disabled) {
         transform: translateY(-2px);
-        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 5px 20px rgba(14, 69, 127, 0.4);
     }
     
     .btn:disabled {
@@ -151,7 +151,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>🧠 Entrenar Modelo de Reconocimiento</h1>
+        <h1>Entrenar Modelo de Reconocimiento</h1>
         <a href="{% url 'dashboard' %}" class="btn-back">← Volver al Dashboard</a>
     </div>
 
@@ -164,23 +164,23 @@
                 </div>
             {% endfor %}
         {% endif %}
-    <h2 style="margin-bottom: 30px;">🧠 Entrenar Modelo</h2>
+    <h2 style="margin-bottom: 30px;">Entrenar Modelo</h2>
 
     <div class="info-card">
-        <h3 style="margin-bottom: 20px;">📊 Información Actual</h3>
+        <h3 style="margin-bottom: 20px;">Información Actual</h3>
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
             <div>
                 <p style="color: #666; font-size: 14px;">Personas</p>
-                <p style="font-size: 32px; font-weight: bold; color: #667eea;">{{ persons|length }}</p>
+                <p style="font-size: 32px; font-weight: bold; color: #0e457f;">{{ persons|length }}</p>
             </div>
             <div>
                 <p style="color: #666; font-size: 14px;">Huellas Faciales</p>
-                <p style="font-size: 32px; font-weight: bold; color: #667eea;">{{ total_encodings }}</p>
+                <p style="font-size: 32px; font-weight: bold; color: #0e457f;">{{ total_encodings }}</p>
             </div>
             <div>
                 <p style="color: #666; font-size: 14px;">Estado</p>
                 <p style="font-size: 18px; font-weight: bold; color: {% if latest_training %}#4caf50{% else %}#ff9800{% endif %};">
-                    {% if latest_training %}✅ Entrenado{% else %}⚠️ Sin entrenar{% endif %}
+                    {% if latest_training %}✓ Entrenado{% else %}⚠ Sin entrenar{% endif %}
                 </p>
             </div>
         </div>
@@ -188,7 +188,7 @@
 
         {% if persons|length < 2 %}
         <div class="message message-error">
-            ⚠️ <strong>Necesitas al menos 2 personas registradas para entrenar.</strong><br>
+            <strong>Necesitas al menos 2 personas registradas para entrenar.</strong><br>
             <a href="{% url 'register' %}" style="color: #721c24; font-weight: bold; text-decoration: underline;">
                 Registra más personas aquí
             </a>
@@ -196,7 +196,7 @@
         {% endif %}
 
     <div class="info-card">
-        <h3 style="margin-bottom: 15px;">👥 Personas Registradas</h3>
+        <h3 style="margin-bottom: 15px;">Personas Registradas</h3>
         <div class="persons-grid">
             {% for person in persons %}
             <div class="person-card">
@@ -212,13 +212,13 @@
         <form method="POST" id="train-form">
             {% csrf_token %}
             <button type="submit" class="btn btn-primary" id="train-btn" {% if persons|length < 2 %}disabled{% endif %}>
-                🚀 Iniciar Entrenamiento
+                Iniciar Entrenamiento
             </button>
         </form>
         
         <div class="loading" id="loading">
             <div class="spinner"></div>
-            <h3>⏳ Entrenando modelo...</h3>
+            <h3>Entrenando modelo...</h3>
             <p style="color: #666; margin-top: 10px;">
                 Esto puede tomar 1-5 minutos dependiendo de la cantidad de datos.<br>
                 <strong>No cierres esta página.</strong>
@@ -227,7 +227,7 @@
 
         {% if latest_training %}
         <div class="info-card" style="margin-top: 30px;">
-            <h3>📈 Último Entrenamiento</h3>
+            <h3>Último Entrenamiento</h3>
             <p style="color: #666; margin-top: 10px;">
                 Fecha: <strong>{{ latest_training.training_date|date:"d/m/Y H:i" }}</strong><br>
                 Precisión: <strong style="color: #4caf50;">{{ latest_training.final_accuracy|floatformat:2 }}%</strong><br>

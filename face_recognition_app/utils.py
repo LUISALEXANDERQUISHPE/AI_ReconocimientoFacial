@@ -1,3 +1,4 @@
+# face_recognition_app/utils.py
 import cv2
 import numpy as np
 import tensorflow as tf
@@ -42,10 +43,10 @@ class FaceRecognitionUtils:
                 if os.path.exists(model_path) and os.path.exists(classes_path):
                     self.model = tf.keras.models.load_model(model_path)
                     self.classes = np.load(classes_path, allow_pickle=True)
-                    print(f"✅ Modelo cargado: {latest_training['model_file']} con {len(self.classes)} clases")
+                    print(f" Modelo cargado: {latest_training['model_file']} con {len(self.classes)} clases")
                     return True
                 else:
-                    print(f"❌ Archivos no encontrados: {model_path} o {classes_path}")
+                    print(f" Archivos no encontrados: {model_path} o {classes_path}")
             
             return False
         except Exception as e:
@@ -91,6 +92,7 @@ class FaceRecognitionUtils:
                 caracteristicas = caracteristicas / np.linalg.norm(caracteristicas)
             
             return caracteristicas
+            
         except Exception as e:
             print(f"Error extrayendo características: {e}")
             return None
@@ -127,6 +129,7 @@ class FaceRecognitionUtils:
     def decode_base64_image(self, base64_string):
         """Decodifica imagen base64 a numpy array"""
         try:
+            # Remover prefijo data:image si existe
             if ',' in base64_string:
                 base64_string = base64_string.split(',')[1]
             
@@ -193,47 +196,41 @@ class ModelTrainer:
                     continue
             
             if len(X) == 0:
-                print("⚠️ No se encontraron encodings en MongoDB")
+                print(" No se encontraron encodings en MongoDB")
                 return np.array([]), np.array([])
-
-            print(f"✅ Cargados {len(X)} encodings de MongoDB")
+            
+            print(f"Cargados {len(X)} encodings de MongoDB")
             return np.array(X, dtype=np.float32), np.array(y)
             
         except Exception as e:
             print(f"Error cargando desde MongoDB: {e}")
             return np.array([]), np.array([])
     
+    def load_encodings_from_db(self):
+        """Alias para compatibilidad - usa MongoDB"""
+        return self.load_encodings_from_mongodb()
+    
+    def train_from_mongodb(self):
+        """Alias para compatibilidad - redirige a train()"""
+        return self.train()
+    
     def build_model(self, num_classes):
-        """Construye el modelo CNN para reconocimiento facial"""
+        """Construye el modelo de red neuronal"""
         model = tf.keras.models.Sequential([
-            # Capa convolucional 1
-            tf.keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=(64, 64, 3)),
-            tf.keras.layers.MaxPooling2D((2, 2)),
+            tf.keras.layers.Input(shape=(128,)),
+            tf.keras.layers.Dense(256, activation="relu"),
+            tf.keras.layers.BatchNormalization(),
             tf.keras.layers.Dropout(0.3),
-            
-            # Capa convolucional 2
-            tf.keras.layers.Conv2D(64, (3, 3), activation='relu'),
-            tf.keras.layers.MaxPooling2D((2, 2)),
+            tf.keras.layers.Dense(128, activation="relu"),
+            tf.keras.layers.BatchNormalization(),
             tf.keras.layers.Dropout(0.3),
-            
-            # Capa convolucional 3
-            tf.keras.layers.Conv2D(128, (3, 3), activation='relu'),
-            tf.keras.layers.MaxPooling2D((2, 2)),
-            tf.keras.layers.Dropout(0.3),
-            
-            # Capa aplanada para conectar con la capa densa
-            tf.keras.layers.Flatten(),
-            
-            # Capa densa 1
-            tf.keras.layers.Dense(128, activation='relu'),
-            tf.keras.layers.Dropout(0.5),
-            
-            # Capa densa 2
-            tf.keras.layers.Dense(num_classes, activation='softmax')
+            tf.keras.layers.Dense(64, activation="relu"),
+            tf.keras.layers.Dropout(0.2),
+            tf.keras.layers.Dense(num_classes, activation="softmax")
         ])
         
         model.compile(
-            optimizer=tf.keras.optimizers.Adam(learning_rate=0.0005),
+            optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
             loss="categorical_crossentropy",
             metrics=["accuracy"]
         )
@@ -245,7 +242,7 @@ class ModelTrainer:
         import time
         from sklearn.preprocessing import LabelEncoder
         
-        X, y = self.load_encodings_from_mongodb()
+        X, y = self.load_encodings_from_db()
         
         if len(X) == 0:
             return {'success': False, 'error': 'No hay datos para entrenar'}
@@ -261,8 +258,10 @@ class ModelTrainer:
         
         y_cat = tf.keras.utils.to_categorical(y_int, num_classes=num_classes)
         
+        # Construir modelo
         model = self.build_model(num_classes)
         
+        # Entrenar
         epochs = min(1000, max(20, len(X) * 2))
         batch_size = max(4, min(32, len(X) // 4))
         
@@ -282,16 +281,18 @@ class ModelTrainer:
         
         training_time = time.time() - start_time
         
+        # Eliminar modelos antiguos
         if os.path.exists(self.model_dir):
             for file in os.listdir(self.model_dir):
                 if file.endswith('.h5') or file.endswith('.npy'):
                     old_file_path = os.path.join(self.model_dir, file)
                     try:
                         os.remove(old_file_path)
-                        print(f"🗑️ Eliminado: {file}")
+                        print(f" Eliminado: {file}")
                     except Exception as e:
-                        print(f"⚠️ No se pudo eliminar {file}: {e}")
+                        print(f" No se pudo eliminar {file}: {e}")
         
+        # Guardar nuevo modelo
         timestamp = time.strftime('%Y%m%d_%H%M%S')
         model_filename = f'modelo_{timestamp}.h5'
         classes_filename = f'clases_{timestamp}.npy'
@@ -301,8 +302,9 @@ class ModelTrainer:
         
         model.save(model_path)
         np.save(classes_path, classes)
-        print(f"✅ Nuevo modelo guardado: {model_filename}")
+        print(f" Nuevo modelo guardado: {model_filename}")
         
+        # Preparar resultado
         final_acc = history.history['accuracy'][-1]
         val_acc = history.history.get('val_accuracy', [None])[-1]
         

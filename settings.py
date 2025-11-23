@@ -111,6 +111,10 @@ SESSION_COOKIE_AGE = 86400  # 24 horas
 # Security (desarrollo)
 CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000']
 
+# Límites de carga de datos (para 800 encodings)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10 MB (default: 2.5 MB)
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10 MB
+
 # TensorFlow settings
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
