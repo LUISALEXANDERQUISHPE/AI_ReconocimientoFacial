@@ -1,4 +1,3 @@
-# face_recognition_app/utils.py
 import cv2
 import numpy as np
 import tensorflow as tf
@@ -92,7 +91,6 @@ class FaceRecognitionUtils:
                 caracteristicas = caracteristicas / np.linalg.norm(caracteristicas)
             
             return caracteristicas
-            
         except Exception as e:
             print(f"Error extrayendo características: {e}")
             return None
@@ -129,7 +127,6 @@ class FaceRecognitionUtils:
     def decode_base64_image(self, base64_string):
         """Decodifica imagen base64 a numpy array"""
         try:
-            # Remover prefijo data:image si existe
             if ',' in base64_string:
                 base64_string = base64_string.split(',')[1]
             
@@ -198,7 +195,7 @@ class ModelTrainer:
             if len(X) == 0:
                 print("⚠️ No se encontraron encodings en MongoDB")
                 return np.array([]), np.array([])
-            
+
             print(f"✅ Cargados {len(X)} encodings de MongoDB")
             return np.array(X, dtype=np.float32), np.array(y)
             
@@ -206,31 +203,37 @@ class ModelTrainer:
             print(f"Error cargando desde MongoDB: {e}")
             return np.array([]), np.array([])
     
-    def load_encodings_from_db(self):
-        """Alias para compatibilidad - usa MongoDB"""
-        return self.load_encodings_from_mongodb()
-    
-    def train_from_mongodb(self):
-        """Alias para compatibilidad - redirige a train()"""
-        return self.train()
-    
     def build_model(self, num_classes):
-        """Construye el modelo de red neuronal"""
+        """Construye el modelo CNN para reconocimiento facial"""
         model = tf.keras.models.Sequential([
-            tf.keras.layers.Input(shape=(128,)),
-            tf.keras.layers.Dense(256, activation="relu"),
-            tf.keras.layers.BatchNormalization(),
+            # Capa convolucional 1
+            tf.keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=(64, 64, 3)),
+            tf.keras.layers.MaxPooling2D((2, 2)),
             tf.keras.layers.Dropout(0.3),
-            tf.keras.layers.Dense(128, activation="relu"),
-            tf.keras.layers.BatchNormalization(),
+            
+            # Capa convolucional 2
+            tf.keras.layers.Conv2D(64, (3, 3), activation='relu'),
+            tf.keras.layers.MaxPooling2D((2, 2)),
             tf.keras.layers.Dropout(0.3),
-            tf.keras.layers.Dense(64, activation="relu"),
-            tf.keras.layers.Dropout(0.2),
-            tf.keras.layers.Dense(num_classes, activation="softmax")
+            
+            # Capa convolucional 3
+            tf.keras.layers.Conv2D(128, (3, 3), activation='relu'),
+            tf.keras.layers.MaxPooling2D((2, 2)),
+            tf.keras.layers.Dropout(0.3),
+            
+            # Capa aplanada para conectar con la capa densa
+            tf.keras.layers.Flatten(),
+            
+            # Capa densa 1
+            tf.keras.layers.Dense(128, activation='relu'),
+            tf.keras.layers.Dropout(0.5),
+            
+            # Capa densa 2
+            tf.keras.layers.Dense(num_classes, activation='softmax')
         ])
         
         model.compile(
-            optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
+            optimizer=tf.keras.optimizers.Adam(learning_rate=0.0005),
             loss="categorical_crossentropy",
             metrics=["accuracy"]
         )
@@ -242,7 +245,7 @@ class ModelTrainer:
         import time
         from sklearn.preprocessing import LabelEncoder
         
-        X, y = self.load_encodings_from_db()
+        X, y = self.load_encodings_from_mongodb()
         
         if len(X) == 0:
             return {'success': False, 'error': 'No hay datos para entrenar'}
@@ -258,10 +261,8 @@ class ModelTrainer:
         
         y_cat = tf.keras.utils.to_categorical(y_int, num_classes=num_classes)
         
-        # Construir modelo
         model = self.build_model(num_classes)
         
-        # Entrenar
         epochs = min(1000, max(20, len(X) * 2))
         batch_size = max(4, min(32, len(X) // 4))
         
@@ -281,7 +282,6 @@ class ModelTrainer:
         
         training_time = time.time() - start_time
         
-        # Eliminar modelos antiguos
         if os.path.exists(self.model_dir):
             for file in os.listdir(self.model_dir):
                 if file.endswith('.h5') or file.endswith('.npy'):
@@ -292,7 +292,6 @@ class ModelTrainer:
                     except Exception as e:
                         print(f"⚠️ No se pudo eliminar {file}: {e}")
         
-        # Guardar nuevo modelo
         timestamp = time.strftime('%Y%m%d_%H%M%S')
         model_filename = f'modelo_{timestamp}.h5'
         classes_filename = f'clases_{timestamp}.npy'
@@ -304,7 +303,6 @@ class ModelTrainer:
         np.save(classes_path, classes)
         print(f"✅ Nuevo modelo guardado: {model_filename}")
         
-        # Preparar resultado
         final_acc = history.history['accuracy'][-1]
         val_acc = history.history.get('val_accuracy', [None])[-1]
         
